@@ -82,6 +82,13 @@ export class TestService {
     return this.http.get<Test[]>(`${this.apiUrl}/me`);
   }
 
+  getTestsFiltered(dateFrom?: string, dateTo?: string): Observable<Test[]> {
+    const params: Record<string, string> = {};
+    if (dateFrom) params['date_from'] = dateFrom;
+    if (dateTo) params['date_to'] = dateTo;
+    return this.http.get<Test[]>(`${this.apiUrl}/me`, { params });
+  }
+
   getTestDetail(testId: number): Observable<TestDetail> {
     return this.http.get<TestDetail>(`${this.apiUrl}/${testId}`);
   }

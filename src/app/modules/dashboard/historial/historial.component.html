@@ -1,0 +1,134 @@
+<div class="page">
+  <div class="page__header">
+    <a routerLink="/dashboard" class="back-link">
+      <mat-icon>arrow_back</mat-icon>
+      <span>Dashboard</span>
+    </a>
+    <h1 class="page__title">Historial de Tests</h1>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="error-banner">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  <div class="section">
+    <div class="date-filter">
+      <div class="date-filter__field">
+        <label class="date-filter__label">Desde</label>
+        <input
+          type="date"
+          class="date-input"
+          [ngModel]="dateFrom()"
+          (ngModelChange)="dateFrom.set($event)"
+        />
+      </div>
+      <div class="date-filter__field">
+        <label class="date-filter__label">Hasta</label>
+        <input
+          type="date"
+          class="date-input"
+          [ngModel]="dateTo()"
+          (ngModelChange)="dateTo.set($event)"
+        />
+      </div>
+      <div class="date-filter__actions">
+        <button class="btn-primary-sm" (click)="loadTests()" [disabled]="isLoading()">Filtrar</button>
+        @if (dateFrom() || dateTo()) {
+          <button class="btn-ghost-sm" (click)="clearFilter()">Limpiar</button>
+        }
+      </div>
+    </div>
+
+    @if (isLoading()) {
+      <div class="loading-state">
+        <mat-spinner diameter="36" />
+      </div>
+    } @else {
+      <div class="table-wrapper">
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="col-expand"></th>
+              <th>Usuario</th>
+              <th>Email</th>
+              <th>Tests</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (report of pagedReports(); track report.user_id) {
+              <!-- Fila del usuario -->
+              <tr class="row-user" (click)="toggleExpand(report.user_id)">
+                <td class="col-expand">
+                  <mat-icon class="expand-icon" [class.expand-icon--open]="isExpanded(report.user_id)">
+                    chevron_right
+                  </mat-icon>
+                </td>
+                <td class="cell--username">{{ report.username }}</td>
+                <td>{{ report.email }}</td>
+                <td>
+                  <span class="count-badge">{{ report.tests.length }}</span>
+                </td>
+              </tr>
+
+              <!-- Filas de detalle (expandibles) -->
+              @if (isExpanded(report.user_id)) {
+                <tr class="row-detail-header">
+                  <td></td>
+                  <td colspan="3">
+                    <table class="detail-table">
+                      <thead>
+                        <tr>
+                          <th>Fecha</th>
+                          <th>Resultado</th>
+                          <th>Probabilidad</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (test of report.tests; track test.test_id) {
+                          <tr>
+                            <td>{{ test.completed_at | date:'dd/MM/yyyy' }}</td>
+                            <td>
+                              <span class="badge" [class.badge--yes]="test.prediction === 'SI'" [class.badge--no]="test.prediction === 'N'">
+                                {{ test.prediction }}
+                              </span>
+                            </td>
+                            <td>{{ test.probability | percent:'1.1-1' }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              }
+            } @empty {
+              <tr>
+                <td colspan="4" class="empty-state">No hay tests para el período seleccionado.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (totalPages() > 1) {
+        <div class="pagination">
+          <button class="page-btn" (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          @for (page of [].constructor(totalPages()); track $index) {
+            <button
+              class="page-btn"
+              [class.page-btn--active]="currentPage() === $index + 1"
+              (click)="goToPage($index + 1)"
+            >{{ $index + 1 }}</button>
+          }
+          <button class="page-btn" (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      }
+    }
+  </div>
+</div>

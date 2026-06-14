@@ -1,0 +1,215 @@
+<div class="page">
+  <div class="page__header">
+    <a routerLink="/dashboard" class="back-link">
+      <mat-icon>arrow_back</mat-icon>
+      <span>Dashboard</span>
+    </a>
+    <h1 class="page__title">Reportes y Gráficos</h1>
+  </div>
+
+  <!-- Card estadísticas globales -->
+  <div class="stats-card">
+    <div class="stats-card__top">
+      <h2 class="stats-card__title">Estadísticas de Burnout</h2>
+      <button class="btn-refresh" (click)="loadBurnoutStats()" [disabled]="isLoadingStats()" title="Actualizar">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+    @if (statsError()) {
+      <div class="error-banner"><mat-icon>error_outline</mat-icon><span>{{ statsError() }}</span></div>
+    } @else if (isLoadingStats()) {
+      <div class="loading-state"><mat-spinner diameter="28" /></div>
+    } @else if (burnoutStats()) {
+      <div class="stats-body">
+        <div class="stat-rows">
+          <div class="stat-row stat-row--total">
+            <span class="stat-row__value">{{ burnoutStats()!.total_completed_tests }}</span>
+            <span class="stat-row__label">Tests completados</span>
+          </div>
+          <div class="stat-row stat-row--yes">
+            <span class="stat-row__value">{{ burnoutStats()!.burnout_yes }}</span>
+            <span class="stat-row__label">Con burnout · {{ burnoutStats()!.burnout_yes_percentage | number:'1.1-1' }}%</span>
+          </div>
+          <div class="stat-row stat-row--no">
+            <span class="stat-row__value">{{ burnoutStats()!.burnout_no }}</span>
+            <span class="stat-row__label">Sin burnout · {{ burnoutStats()!.burnout_no_percentage | number:'1.1-1' }}%</span>
+          </div>
+        </div>
+        @if (pieSlices()) {
+          <div class="pie-wrap">
+            <svg viewBox="0 0 100 100" class="pie-chart">
+              <path [attr.d]="pieSlices()!.yes" class="pie--yes" />
+              <path [attr.d]="pieSlices()!.no" class="pie--no" />
+            </svg>
+            <div class="pie-legend">
+              <span class="legend-dot legend-dot--yes"></span><span>SI</span>
+              <span class="legend-dot legend-dot--no"></span><span>NO</span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  @if (errorMessage()) {
+    <div class="error-banner">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="40" />
+    </div>
+  } @else if (rows().length === 0) {
+    <div class="empty-state">No hay datos para el período seleccionado.</div>
+  } @else {
+    <div class="charts-grid">
+
+      <!-- ── Gráfico 1: Distribución por género (torta) ── -->
+      <div class="chart-card">
+        <h2 class="chart-card__title">Distribución por Género</h2>
+        <div class="pie-layout">
+          <svg viewBox="0 0 100 100" class="pie-svg">
+            @for (slice of generoPie(); track slice.label) {
+              <path [attr.d]="slice.path" [attr.fill]="slice.color" />
+            }
+          </svg>
+          <div class="pie-legend">
+            @for (slice of generoPie(); track slice.label) {
+              <div class="legend-item">
+                <span class="legend-dot" [style.background]="slice.color"></span>
+                <span>{{ slice.label }} ({{ slice.count }})</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Gráfico 4: Prácticas preprofesionales (torta) ── -->
+      <div class="chart-card">
+        <h2 class="chart-card__title">Distribución por Prácticas Preprofesionales</h2>
+        <div class="pie-layout">
+          <svg viewBox="0 0 100 100" class="pie-svg">
+            @for (slice of practicasPie(); track slice.label) {
+              <path [attr.d]="slice.path" [attr.fill]="slice.color" />
+            }
+          </svg>
+          <div class="pie-legend">
+            @for (slice of practicasPie(); track slice.label) {
+              <div class="legend-item">
+                <span class="legend-dot" [style.background]="slice.color"></span>
+                <span>{{ slice.label }} ({{ slice.count }})</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Gráfico 2: Distribución por facultad (barras horizontales) ── -->
+      <div class="chart-card chart-card--wide">
+        <h2 class="chart-card__title">Distribución por Facultad</h2>
+        <div class="hbar-chart">
+          @for (entry of objectEntries(facultadData()); track entry[0]) {
+            <div class="hbar-row">
+              <span class="hbar-label" [title]="entry[0]">{{ shortLabel(entry[0]) }}</span>
+              <div class="hbar-track">
+                <div
+                  class="hbar-fill"
+                  [style.width.%]="(entry[1] / maxFacultad()) * 100"
+                ></div>
+              </div>
+              <span class="hbar-value">{{ entry[1] }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- ── Gráfico 3: Burnout por género (barras agrupadas) ── -->
+      <div class="chart-card">
+        <h2 class="chart-card__title">Burnout por Género</h2>
+        <div class="grouped-legend">
+          <span class="grouped-dot grouped-dot--si"></span><span>Con burnout</span>
+          <span class="grouped-dot grouped-dot--no"></span><span>Sin burnout</span>
+        </div>
+        <div class="grouped-chart">
+          @for (group of burnoutPorGenero(); track group.label) {
+            <div class="grouped-group">
+              <div class="grouped-bars">
+                <div class="grouped-bar-wrap">
+                  <div class="grouped-bar grouped-bar--si" [style.height.px]="barHeight(group.si, maxBurnoutGenero())">
+                    <span class="grouped-bar-val">{{ group.si }}</span>
+                  </div>
+                </div>
+                <div class="grouped-bar-wrap">
+                  <div class="grouped-bar grouped-bar--no" [style.height.px]="barHeight(group.no, maxBurnoutGenero())">
+                    <span class="grouped-bar-val">{{ group.no }}</span>
+                  </div>
+                </div>
+              </div>
+              <span class="grouped-label">{{ group.label }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Gráfico 5: Burnout por prácticas (barras agrupadas) -->
+      <div class="chart-card">
+        <h2 class="chart-card__title">Burnout por Prácticas</h2>
+        <div class="grouped-legend">
+          <span class="grouped-dot grouped-dot--si"></span><span>Con burnout</span>
+          <span class="grouped-dot grouped-dot--no"></span><span>Sin burnout</span>
+        </div>
+        <div class="grouped-chart">
+          @for (group of burnoutPorPracticas(); track group.label) {
+            <div class="grouped-group">
+              <div class="grouped-bars">
+                <div class="grouped-bar-wrap">
+                  <div class="grouped-bar grouped-bar--si" [style.height.px]="barHeight(group.si, maxBurnoutPracticas())">
+                    <span class="grouped-bar-val">{{ group.si }}</span>
+                  </div>
+                </div>
+                <div class="grouped-bar-wrap">
+                  <div class="grouped-bar grouped-bar--no" [style.height.px]="barHeight(group.no, maxBurnoutPracticas())">
+                    <span class="grouped-bar-val">{{ group.no }}</span>
+                  </div>
+                </div>
+              </div>
+              <span class="grouped-label">{{ group.label }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Gráfico 6: Burnout por facultad (barras agrupadas, ancho completo) -->
+      <div class="chart-card chart-card--wide">
+        <h2 class="chart-card__title">Burnout por Facultad</h2>
+        <div class="grouped-legend">
+          <span class="grouped-dot grouped-dot--si"></span><span>Con burnout</span>
+          <span class="grouped-dot grouped-dot--no"></span><span>Sin burnout</span>
+        </div>
+        <div class="grouped-chart grouped-chart--wide">
+          @for (group of burnoutPorFacultad(); track group.label) {
+            <div class="grouped-group">
+              <div class="grouped-bars">
+                <div class="grouped-bar-wrap">
+                  <div class="grouped-bar grouped-bar--si" [style.height.px]="barHeight(group.si, maxBurnoutFacultad())">
+                    <span class="grouped-bar-val">{{ group.si }}</span>
+                  </div>
+                </div>
+                <div class="grouped-bar-wrap">
+                  <div class="grouped-bar grouped-bar--no" [style.height.px]="barHeight(group.no, maxBurnoutFacultad())">
+                    <span class="grouped-bar-val">{{ group.no }}</span>
+                  </div>
+                </div>
+              </div>
+              <span class="grouped-label" [title]="group.label">{{ shortLabel(group.label) }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+    </div>
+  }
+</div>

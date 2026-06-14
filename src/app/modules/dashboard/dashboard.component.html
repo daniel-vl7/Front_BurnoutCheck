@@ -1,0 +1,38 @@
+<div class="dashboard">
+
+  <div class="dashboard__header">
+    <h1 class="dashboard__title">Dashboard</h1>
+    <p class="dashboard__subtitle">Bienvenido, {{ authService.currentUser()?.name ?? authService.currentUser()?.username }}</p>
+  </div>
+
+  <div class="cards-grid">
+
+    <a routerLink="/dashboard/users" class="card card--nav">
+      <div class="card__icon-wrap card__icon-wrap--users">
+        <mat-icon>group</mat-icon>
+      </div>
+      <h2 class="card__title">Usuarios</h2>
+      <p class="card__desc">Ver y gestionar todos los usuarios registrados en la plataforma.</p>
+      <span class="card__arrow"><mat-icon>arrow_forward</mat-icon></span>
+    </a>
+
+    <a routerLink="/dashboard/historial" class="card card--nav">
+      <div class="card__icon-wrap card__icon-wrap--historial">
+        <mat-icon>history</mat-icon>
+      </div>
+      <h2 class="card__title">Historial de Tests</h2>
+      <p class="card__desc">Consultar todos los tests completados con filtro por rango de fechas.</p>
+      <span class="card__arrow"><mat-icon>arrow_forward</mat-icon></span>
+    </a>
+
+    <a routerLink="/dashboard/reports" class="card card--nav card--reportes">
+      <div class="card__icon-wrap card__icon-wrap--reportes">
+        <mat-icon>insights</mat-icon>
+      </div>
+      <h2 class="card__title">Reportes y Gráficos</h2>
+      <p class="card__desc">Distribución por género, facultad, burnout y prácticas preprofesionales.</p>
+      <span class="card__arrow"><mat-icon>arrow_forward</mat-icon></span>
+    </a>
+
+  </div>
+</div>

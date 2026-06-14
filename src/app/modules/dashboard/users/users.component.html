@@ -1,0 +1,112 @@
+<div class="page">
+  <div class="page__header">
+    <a routerLink="/dashboard" class="back-link">
+      <mat-icon>arrow_back</mat-icon>
+      <span>Dashboard</span>
+    </a>
+    <h1 class="page__title">Usuarios</h1>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="error-banner">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  <div class="section">
+    <div class="section__header">
+      <span class="section__count">{{ users().length }} usuarios</span>
+      <button class="btn-refresh" (click)="loadUsers()" [disabled]="isLoading()">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+
+    @if (isLoading()) {
+      <div class="loading-state">
+        <mat-spinner diameter="36" />
+      </div>
+    } @else {
+      <div class="table-wrapper">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Usuario</th>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (user of pagedUsers(); track user.id) {
+              <tr [class.row--deleting]="deletingId() === user.id">
+                <td class="cell--id">{{ user.id }}</td>
+                <td class="cell--username">{{ user.username }}</td>
+                <td>{{ user.name ?? '—' }} {{ user.lastname ?? '' }}</td>
+                <td>{{ user.email }}</td>
+                <td>
+                  <span class="badge" [class.badge--admin]="user.role === 'admin'" [class.badge--user]="user.role === 'user'">
+                    {{ user.role }}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge" [class.badge--active]="user.active" [class.badge--inactive]="!user.active">
+                    {{ user.active ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td class="cell--actions">
+                  @if (user.id === currentUserId()) {
+                    <span class="self-label">Tú</span>
+                  } @else if (confirmDeleteId() === user.id) {
+                    <div class="confirm-actions">
+                      <button class="btn-danger-sm" (click)="confirmDelete(user.id)">Confirmar</button>
+                      <button class="btn-ghost-sm" (click)="cancelDelete()">Cancelar</button>
+                    </div>
+                  } @else {
+                    <button
+                      class="btn-icon btn-icon--delete"
+                      (click)="requestDelete(user.id)"
+                      [disabled]="deletingId() !== null"
+                      title="Eliminar usuario"
+                    >
+                      @if (deletingId() === user.id) {
+                        <mat-spinner diameter="16" />
+                      } @else {
+                        <mat-icon>delete_outline</mat-icon>
+                      }
+                    </button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7" class="empty-state">No hay usuarios registrados.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (totalPages() > 1) {
+        <div class="pagination">
+          <button class="page-btn" (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          @for (page of [].constructor(totalPages()); track $index) {
+            <button
+              class="page-btn"
+              [class.page-btn--active]="currentPage() === $index + 1"
+              (click)="goToPage($index + 1)"
+            >{{ $index + 1 }}</button>
+          }
+          <button class="page-btn" (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      }
+    }
+  </div>
+</div>

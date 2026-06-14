@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, switchMap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { LoginRequest, RegisterRequest, TokenResponse } from '../models/auth.interface';
 import { User, UserDetail } from '../models/user.interface';
@@ -28,13 +28,14 @@ export class AuthService {
     }
   }
 
-  login(credentials: LoginRequest): Observable<TokenResponse> {
+  login(credentials: LoginRequest): Observable<UserDetail> {
     return this.http.post<TokenResponse>(`${this.apiUrl}/login`, credentials).pipe(
       tap(response => {
         this.tokenService.setToken(response.access_token);
         this.isAuthenticated.set(true);
-        this.loadCurrentUser();
-      })
+      }),
+      switchMap(() => this.http.get<UserDetail>(`${environment.api}/users/me`)),
+      tap(user => this.currentUser.set(user))
     );
   }
 

@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/security/guards/auth.guard';
+import { adminGuard, homeRedirectGuard } from './core/security/guards/role.guard';
 
 export const routes: Routes = [
   // ===== RUTAS PÚBLICAS =====
@@ -74,6 +75,29 @@ export const routes: Routes = [
             loadComponent: () => import('./modules/recommendation/recommendation.component').then(m => m.RecommendationComponent)
           }
         ]
+      },
+      {
+        path: 'dashboard',
+        canActivate: [adminGuard],
+        loadComponent: () => import('./modules/layout/layout.component').then(m => m.LayoutComponent),
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./modules/dashboard/dashboard.component').then(m => m.DashboardComponent)
+          },
+          {
+            path: 'users',
+            loadComponent: () => import('./modules/dashboard/users/users.component').then(m => m.UsersComponent)
+          },
+          {
+            path: 'historial',
+            loadComponent: () => import('./modules/dashboard/historial/historial.component').then(m => m.HistorialComponent)
+          },
+          {
+            path: 'reports',
+            loadComponent: () => import('./modules/dashboard/reportes/reportes.component').then(m => m.ReportesComponent)
+          }
+        ]
       }
     ]
   },
@@ -81,8 +105,9 @@ export const routes: Routes = [
   // ===== REDIRECTS =====
   {
     path: '',
-    redirectTo: '/home',
-    pathMatch: 'full'
+    canActivate: [authGuard, homeRedirectGuard],
+    pathMatch: 'full',
+    children: []
   },
   {
     path: '**',

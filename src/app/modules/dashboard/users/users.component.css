@@ -1,0 +1,222 @@
+.page {
+  padding: 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.page__header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.back-link {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #6b7280;
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: color 0.15s;
+}
+
+.back-link:hover { color: #374151; }
+
+.page__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fff0f0;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  color: #dc2626;
+  margin-bottom: 1rem;
+}
+
+.section {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 1.5rem;
+}
+
+.section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.section__count {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.btn-refresh {
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0.3rem 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: #555;
+  transition: background 0.15s;
+}
+
+.btn-refresh:hover:not(:disabled) { background: #f5f5f5; }
+.btn-refresh:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 0;
+}
+
+.table-wrapper { overflow-x: auto; }
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.table thead tr { border-bottom: 2px solid #e5e7eb; }
+
+.table th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #f3f4f6;
+  color: #374151;
+}
+
+.table tbody tr:hover { background: #f9fafb; }
+.table tbody tr:last-child td { border-bottom: none; }
+
+.row--deleting { opacity: 0.4; pointer-events: none; }
+.cell--id { color: #9ca3af; font-size: 0.8rem; }
+.cell--username { font-weight: 500; }
+.cell--actions { width: 130px; }
+
+.empty-state {
+  text-align: center;
+  color: #9ca3af;
+  padding: 2rem !important;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.badge--admin    { background: #ede9fe; color: #6d28d9; }
+.badge--user     { background: #e0f2fe; color: #0369a1; }
+.badge--active   { background: #dcfce7; color: #166534; }
+.badge--inactive { background: #f3f4f6; color: #6b7280; }
+
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.35rem;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.btn-icon--delete { color: #ef4444; }
+.btn-icon--delete:hover:not(:disabled) { background: #fee2e2; }
+.btn-icon:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.confirm-actions { display: flex; gap: 0.4rem; }
+
+.btn-danger-sm {
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.btn-danger-sm:hover { background: #dc2626; }
+
+.btn-ghost-sm {
+  background: none;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.btn-ghost-sm:hover { background: #f3f4f6; }
+
+.self-label {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* ── Pagination ──────────────────────────────── */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  margin-top: 1.25rem;
+}
+
+.page-btn {
+  min-width: 34px;
+  height: 34px;
+  padding: 0 0.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  color: #374151;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.page-btn:hover:not(:disabled):not(.page-btn--active) {
+  background: #f3f4f6;
+}
+
+.page-btn--active {
+  background: #6366f1;
+  border-color: #6366f1;
+  color: #fff;
+  font-weight: 600;
+}
+
+.page-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}

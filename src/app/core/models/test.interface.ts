@@ -61,3 +61,29 @@ export interface Recommendation {
   created_at: string;
   updated_at: string;
 }
+
+export interface BurnoutStats {
+  total_completed_tests: number;
+  burnout_yes: number;
+  burnout_no: number;
+  burnout_yes_percentage: number;
+  burnout_no_percentage: number;
+}
+
+export interface UserTestReport {
+  user_id: number;
+  name: string;
+  lastname: string;
+  username: string;
+  email: string;
+  tests: {
+    test_id: number;
+    completed_at: string;
+    prediction: 'SI' | 'N';
+    probability: number;
+    ciclo: number;
+    genero: string;
+    facultad: string;
+    practicasprepro: string;
+  }[];
+}
