@@ -1,12 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -20,6 +21,7 @@ import { AuthService } from '../../services/auth.service';
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatSnackBarModule,
     RouterLink
   ],
   templateUrl: './login.component.html',
@@ -29,6 +31,17 @@ export class LoginComponent {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly snackBar = inject(MatSnackBar);
+
+  private showToast(message: string, type: 'success' | 'error'): void {
+    this.snackBar.open(message, 'Cerrar', {
+      duration: 5000,
+      horizontalPosition: 'center',
+      verticalPosition: 'top',
+      panelClass: type === 'success' ? ['app-snackbar-success'] : ['app-snackbar-error']
+    });
+  }
 
   loginForm: FormGroup;
   isLoading = signal<boolean>(false);
@@ -40,6 +53,10 @@ export class LoginComponent {
       username: ['', [Validators.required, Validators.minLength(3)]],
       password: ['', [Validators.required, Validators.minLength(8)]]
     });
+
+    if (this.route.snapshot.queryParamMap.get('registered') === 'true') {
+      this.showToast('Registro realizado correctamente. Inicia sesión con tus credenciales.', 'success');
+    }
   }
 
   onSubmit(): void {
@@ -58,9 +75,9 @@ export class LoginComponent {
       },
       error: (error) => {
         this.isLoading.set(false);
-        this.errorMessage.set(
-          error.error?.detail || 'Usuario o contraseña incorrectos'
-        );
+        const message = error.error?.detail || 'Usuario o contraseña incorrectos';
+        this.errorMessage.set(message);
+        this.showToast(message, 'error');
       }
     });
   }

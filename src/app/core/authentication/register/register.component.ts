@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -39,8 +39,25 @@ export class RegisterComponent {
     this.registerForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(72)]]
+      password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(72), this.passwordStrengthValidator]]
     });
+  }
+
+  private passwordStrengthValidator(control: AbstractControl): ValidationErrors | null {
+    const value = (control.value ?? '').toString();
+
+    if (!value) {
+      return null;
+    }
+
+    const hasUpperCase = /[A-Z]/.test(value);
+    const hasLowerCase = /[a-z]/.test(value);
+    const hasNumber = /\d/.test(value);
+    const hasSpecialChar = /[^A-Za-z\d]/.test(value);
+
+    const isValid = hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar;
+
+    return isValid ? null : { passwordStrength: true };
   }
 
   onSubmit(): void {
@@ -55,8 +72,7 @@ export class RegisterComponent {
     this.authService.register(this.registerForm.value).subscribe({
       next: () => {
         this.isLoading.set(false);
-        // Después del registro exitoso, redirigir al login
-        this.router.navigate(['/login']);
+        this.router.navigate(['/login'], { queryParams: { registered: true } });
       },
       error: (error) => {
         this.isLoading.set(false);
@@ -98,6 +114,10 @@ export class RegisterComponent {
 
     if (field?.hasError('email')) {
       return 'Email inválido';
+    }
+
+    if (fieldName === 'password' && field?.hasError('passwordStrength')) {
+      return 'La contraseña debe incluir al menos una letra mayúscula, una letra minúscula, un número y un carácter especial.';
     }
 
     return '';

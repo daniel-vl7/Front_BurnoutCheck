@@ -111,6 +111,19 @@
   font-weight: var(--font-weight-medium);
 }
 
+/* ===== PASSWORD HINT ===== */
+.register__password-hint {
+  margin: 0;
+  padding-left: var(--spacing-lg);
+  color: var(--text-black);
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+}
+
+.register__password-hint li + li {
+  margin-top: 4px;
+}
+
 /* ===== ERROR MESSAGE ===== */
 .register__error {
   display: flex;
