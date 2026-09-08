@@ -1,53 +1,56 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { RecommendationCardComponent } from '../../shared/components/recommendation-card/recommendation-card.component';
+import { CommonModule } from '@angular/common';
+import { Observable } from 'rxjs';
 import { RecommendationService } from '../../core/services/recommendation.service';
+import { RecommendationCardComponent } from '../../shared/components/recommendation-card/recommendation-card.component';
 import { Recommendation } from '../../core/models/test.interface';
 
 @Component({
-  selector: 'app-recommendations',
+  selector: 'app-recommendation',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    RecommendationCardComponent
-  ],
+  imports: [CommonModule, RecommendationCardComponent],
   templateUrl: './recommendation.component.html',
-  styleUrl: './recommendation.component.css'
+  styleUrl: './recommendation.component.scss'
 })
 export class RecommendationComponent implements OnInit {
   private readonly recommendationService = inject(RecommendationService);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
   recommendations = signal<Recommendation[]>([]);
-  isLoading = signal<boolean>(true);
   errorMessage = signal<string>('');
+
+  readonly isLoading = computed(() => this.recommendationService.isLoading());
+  readonly hasError = computed(() => this.recommendationService.hasError());
 
   ngOnInit(): void {
     this.loadRecommendations();
   }
 
   private loadRecommendations(): void {
-    this.isLoading.set(true);
-    this.errorMessage.set('');
+    this.subscribeToFetch(this.recommendationService.getLastTestRecommendations());
+  }
 
-    this.recommendationService.getLastTestRecommendations().subscribe({
-      next: (recommendations) => {
-        this.recommendations.set(recommendations);
-        this.isLoading.set(false);
-      },
-      error: (error) => {
-        console.error('Error al cargar recomendaciones:', error);
-        this.errorMessage.set('Error al cargar las recomendaciones');
-        this.isLoading.set(false);
-      }
-    });
+  retry(): void {
+    this.errorMessage.set('');
+    this.subscribeToFetch(this.recommendationService.retryFetch());
+  }
+
+  private subscribeToFetch(observable: Observable<Recommendation[]>): void {
+    observable
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (recommendations) => {
+          this.recommendations.set(recommendations);
+          this.errorMessage.set('');
+        },
+        error: (error) => {
+          console.error('Error al cargar recomendaciones:', error);
+          this.errorMessage.set('Error al cargar las recomendaciones. Por favor, inténtalo de nuevo.');
+        }
+      });
   }
 
   goToTest(): void {
